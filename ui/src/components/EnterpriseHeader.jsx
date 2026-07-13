@@ -48,8 +48,10 @@ const EnterpriseHeader = () => {
   const [locationModalOpen, setLocationModalOpen] = useState(false);
   const [fulfillmentType, setFulfillmentType] = useState('shipping');
   const [zipCode, setZipCode] = useState('533001'); // Default Godavari ZIP
-  const [zipInput, setZipInput] = useState('');
+  const [zipInput, setZipInput] = useState('533001');
   const [zipSuccess, setZipSuccess] = useState(false);
+  const [gpsLoading, setGpsLoading] = useState(false);
+  const [gpsError, setGpsError] = useState('');
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -62,19 +64,69 @@ const EnterpriseHeader = () => {
     setDeptOpen(false);
   }, [location]);
 
-  // Load recent searches and fulfillment setup from localStorage
+  // ── Reusable GPS → reverse-geocode → IP fallback detector ──────────────────
+  const detectGPSLocation = (silent = false) => {
+    if (!silent) {
+      setGpsLoading(true);
+      setGpsError('');
+    }
+
+    const applyPostcode = (code) => {
+      const clean = code.trim();
+      setZipCode(clean);
+      setZipInput(clean);
+      localStorage.setItem('wm_zip', clean);
+      window.dispatchEvent(new Event('wm-fulfillment-updated'));
+      if (!silent) setGpsLoading(false);
+    };
+
+    const fallbackIpLocation = () => {
+      fetch('https://ipapi.co/json/')
+        .then(res => res.json())
+        .then(data => {
+          if (data?.postal) applyPostcode(data.postal);
+          else if (!silent) setGpsLoading(false);
+        })
+        .catch(() => { if (!silent) { setGpsLoading(false); setGpsError('Could not detect location.'); } });
+    };
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        ({ coords: { latitude, longitude } }) => {
+          fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`)
+            .then(res => res.json())
+            .then(data => {
+              const postcode = data?.address?.postcode;
+              if (postcode) applyPostcode(postcode);
+              else fallbackIpLocation();
+            })
+            .catch(() => fallbackIpLocation());
+        },
+        () => fallbackIpLocation(),
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+    } else {
+      fallbackIpLocation();
+    }
+  };
+
+  // Load recent searches + always re-detect location from GPS on mount
   useEffect(() => {
     try {
       const savedRecent = JSON.parse(localStorage.getItem('wm_recent_searches') || '[]');
       setRecentSearches(savedRecent);
 
-      const savedZip = localStorage.getItem('wm_zip') || '533001';
       const savedType = localStorage.getItem('wm_fulfillment_type') || 'shipping';
-      setZipCode(savedZip);
       setFulfillmentType(savedType);
-      setZipInput(savedZip);
+
+      // Load cached PIN immediately for fast first render
+      const cachedZip = localStorage.getItem('wm_zip');
+      if (cachedZip) { setZipCode(cachedZip); setZipInput(cachedZip); }
+
+      // Always silently refresh from GPS to correct stale/wrong cached PINs
+      detectGPSLocation(true);
     } catch {}
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Close dept dropdown on outside click
   useEffect(() => {
@@ -216,7 +268,39 @@ const EnterpriseHeader = () => {
     <>
       {/* ── TOP NAV HEADER ── */}
       <header className={`sticky top-0 z-50 w-full transition-shadow duration-200 ${scrolled ? 'shadow-md' : ''}`}>
-        <div className="wm-header-top bg-gradient-to-r from-blue-950 via-blue-900 to-blue-800">
+        {/* Top Info / Utility Bar */}
+        <div className="bg-blue-950/95 text-gray-300 py-1.5 border-b border-white/5 text-[10px] font-bold uppercase tracking-wider print:hidden">
+          <div className="wm-container flex justify-between items-center px-4">
+            <div className="flex items-center gap-4 text-gray-400">
+              <span>📞 Support: +1-800-TRADITIONAL</span>
+              <span className="hidden md:inline">|</span>
+              <span className="hidden md:inline">⚡ Free Shipping above ₹999 / $50</span>
+            </div>
+            
+            <div className="flex items-center gap-5">
+              {/* Fulfillment Picker */}
+              <button 
+                onClick={() => setLocationModalOpen(true)}
+                className="flex items-center gap-1 hover:text-white transition-colors bg-transparent border-none cursor-pointer text-gray-400 text-[10px] font-bold uppercase tracking-wider outline-none"
+              >
+                📍 {fulfillmentType === 'pickup' ? 'Store Pickup' : fulfillmentType === 'delivery' ? 'Delivery' : 'Shipping'}: <span className="text-amber-400 font-extrabold">{zipCode}</span>
+              </button>
+
+              {/* Country Selector */}
+              <select
+                value={countryCode}
+                onChange={e => changeCountry(e.target.value)}
+                className="bg-transparent border-none text-gray-400 hover:text-white text-[10px] font-bold cursor-pointer outline-none uppercase"
+              >
+                <option value="IN" className="text-black">🇮🇳 India (INR)</option>
+                <option value="US" className="text-black">🇺🇸 USA (USD)</option>
+                <option value="GB" className="text-black">🇬🇧 UK (GBP)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div className="wm-header-top bg-slate-900/98 backdrop-blur-md border-b border-slate-950">
           <div className="wm-container">
             <div className="wm-top-inner">
 
@@ -232,41 +316,6 @@ const EnterpriseHeader = () => {
                   <span className="wm-logo-sub text-[8px] text-gray-300">Save money. Eat traditional.</span>
                 </div>
               </Link>
-
-              {/* Fulfillment Location Picker Button */}
-              <button 
-                onClick={() => setLocationModalOpen(true)}
-                className="wm-location-btn" 
-                aria-label="Change fulfillment location"
-              >
-                <svg className="wm-location-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/>
-                </svg>
-                <div className="wm-location-text">
-                  <span className="wm-location-label text-gray-300">
-                    {fulfillmentType === 'pickup' ? 'Store Pickup' : fulfillmentType === 'delivery' ? 'Local Delivery' : 'Shipping'}
-                  </span>
-                  <span className="wm-location-address">ZIP: {zipCode}</span>
-                </div>
-                <svg className="wm-chevron text-gray-300" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd"/>
-                </svg>
-              </button>
-
-              {/* Real-time Country & Currency Selector */}
-              <div className="flex items-center shrink-0">
-                <select
-                  value={countryCode}
-                  onChange={e => changeCountry(e.target.value)}
-                  className="bg-white/10 border border-white/20 text-white text-xs font-bold rounded-full px-3 py-1.5 focus:outline-none cursor-pointer hover:bg-white/15 transition-all outline-none"
-                  aria-label="Select Country"
-                >
-                  <option value="IN" className="text-black">🇮🇳 India (INR)</option>
-                  <option value="US" className="text-black">🇺🇸 USA (USD)</option>
-                  <option value="GB" className="text-black">🇬🇧 UK (GBP)</option>
-                </select>
-              </div>
 
               {/* Smart Autocomplete Search Bar */}
               <div className="wm-search-wrap" ref={deptRef}>
@@ -533,16 +582,56 @@ const EnterpriseHeader = () => {
               <div className="wm-zip-input-group">
                 <input 
                   type="text" 
-                  maxLength={6} 
-                  pattern="[0-9]*"
+                  maxLength={10} 
                   value={zipInput}
-                  onChange={e => setZipInput(e.target.value.replace(/\D/g, ''))}
+                  onChange={e => setZipInput(e.target.value.replace(/[^a-zA-Z0-9 ]/g, ''))}
                   placeholder="e.g. 533001" 
                   className="wm-zip-input"
                   required
                 />
                 <button type="submit" className="wm-zip-submit-btn">Update</button>
               </div>
+
+              {/* GPS Auto-Detect Button */}
+              <button
+                type="button"
+                onClick={() => detectGPSLocation(false)}
+                disabled={gpsLoading}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  marginTop: '10px',
+                  width: '100%',
+                  padding: '9px 14px',
+                  borderRadius: '8px',
+                  border: '1px solid #3b82f6',
+                  background: gpsLoading ? '#eff6ff' : '#fff',
+                  color: '#2563eb',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: gpsLoading ? 'wait' : 'pointer',
+                  transition: 'background 0.2s',
+                }}
+              >
+                {gpsLoading ? (
+                  <>
+                    <svg style={{width:15,height:15,animation:'spin 1s linear infinite'}} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 11-8 8z"/>
+                    </svg>
+                    Detecting your location…
+                  </>
+                ) : (
+                  <>
+                    <svg style={{width:15,height:15}} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 2a7 7 0 017 7c0 5.25-7 13-7 13S5 14.25 5 9a7 7 0 017-7z"/>
+                      <circle cx="12" cy="9" r="2.5" fill="currentColor"/>
+                    </svg>
+                    Use My Current Location (GPS)
+                  </>
+                )}
+              </button>
+              {gpsError && <p style={{color:'#dc2626',fontSize:'11px',marginTop:'6px'}}>{gpsError}</p>}
 
               {zipSuccess && (
                 <div className="wm-zip-feedback">

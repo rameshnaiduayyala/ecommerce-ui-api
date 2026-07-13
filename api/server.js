@@ -1,6 +1,7 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
+import compress from "@fastify/compress";
 import multipart from "@fastify/multipart";
 import { ZodError } from "zod";
 import fs from "fs/promises";
@@ -50,6 +51,11 @@ export async function buildServer() {
     origin: "*", // Adjust for specific production domains
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"]
+  });
+  await fastify.register(compress, {
+    global: true,
+    threshold: 1024,
+    encodings: ["br", "gzip"]
   });
 
   // 2. Register Multipart/File Upload Support
