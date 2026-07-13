@@ -13,7 +13,8 @@ const placeOrderSchema = z.object({
   couponCode: z.string().optional(),
   shippingAddressId: z.string().uuid(),
   billingAddressId: z.string().uuid().optional(),
-  paymentMethod: z.string()
+  paymentMethod: z.string(),
+  currency: z.string().optional()
 });
 
 const updateStatusSchema = z.object({
@@ -55,7 +56,8 @@ export class OrderController {
       shippingAddressId: validated.shippingAddressId,
       billingAddressId: validated.billingAddressId,
       paymentMethod: validated.paymentMethod,
-      userId
+      userId,
+      currency: validated.currency
     });
 
     return reply.status(211).send(formatResponse(true, "Order placed successfully.", order));

@@ -53,7 +53,7 @@ const AnnouncementManager = ({
   };
 
   return (
-    <div className="bg-white p-6 rounded-3xl border border-border/50 shadow-sm overflow-hidden flex flex-col min-h-[70vh] animate-fade-in">
+    <div className="bg-white p-6 rounded-3xl border border-border/50 shadow-sm flex flex-col min-h-[70vh] animate-fade-in">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold font-serif text-[#333]">Flash Update Alerts</h2>

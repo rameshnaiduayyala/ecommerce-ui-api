@@ -171,7 +171,7 @@ const OrderManager = ({
   const guaranteeItems = printGuaranteeText.split('•').map(s => s.trim()).filter(Boolean);
 
   return (
-    <div className="bg-white p-6 rounded-3xl border border-border/50 shadow-sm overflow-hidden flex flex-col min-h-[70vh] animate-fade-in">
+    <div className="bg-white p-6 rounded-3xl border border-border/50 shadow-sm flex flex-col min-h-[70vh] animate-fade-in">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
           <h2 className="text-2xl font-bold font-serif text-[#333]">Fulfillment Control</h2>
@@ -381,17 +381,42 @@ const OrderManager = ({
                     </tr>
                   </thead>
                   <tbody>
-                    {selectedFulfillmentOrder.order_items?.map((item, idx) => (
-                      <tr key={idx} className="border-b border-border/40 text-muted-foreground">
-                        <td className="py-2.5 font-bold text-[#333]">{item.products?.name}</td>
-                        <td className="py-2.5 text-center font-bold">{item.quantity}</td>
-                        <td className="py-2.5 text-right">₹{item.price_at_time}</td>
-                        <td className="py-2.5 text-right font-bold text-[#333]">₹{item.quantity * item.price_at_time}</td>
-                      </tr>
-                    ))}
+                    {selectedFulfillmentOrder.order_items?.map((item, idx) => {
+                      const symbols = { INR: '₹', USD: '$', GBP: '£' };
+                      const orderCurrency = selectedFulfillmentOrder.currency || 'INR';
+                      const symbol = symbols[orderCurrency] || '₹';
+                      const rates = { INR: 1.0, USD: 0.012, GBP: 0.0094 };
+                      const rate = rates[orderCurrency] || 1.0;
+                      
+                      const formatOrderPrice = (val) => {
+                        const converted = Number(val) * rate;
+                        const decimals = orderCurrency === 'INR' ? 0 : 2;
+                        return `${symbol}${converted.toFixed(decimals)}`;
+                      };
+
+                      return (
+                        <tr key={idx} className="border-b border-border/40 text-muted-foreground">
+                          <td className="py-2.5 font-bold text-[#333]">{item.products?.name}</td>
+                          <td className="py-2.5 text-center font-bold">{item.quantity}</td>
+                          <td className="py-2.5 text-right">{formatOrderPrice(item.price_at_time)}</td>
+                          <td className="py-2.5 text-right font-bold text-[#333]">{formatOrderPrice(item.quantity * item.price_at_time)}</td>
+                        </tr>
+                      );
+                    })}
                     <tr className="text-[#333] font-bold">
                       <td colSpan="3" className="py-4 text-right uppercase font-black text-[10px]">Grand Payment Total</td>
-                      <td className="py-4 text-right text-sm text-primary font-black">₹{selectedFulfillmentOrder.total_amount}</td>
+                      <td className="py-4 text-right text-sm text-primary font-black">
+                        {(() => {
+                          const symbols = { INR: '₹', USD: '$', GBP: '£' };
+                          const orderCurrency = selectedFulfillmentOrder.currency || 'INR';
+                          const symbol = symbols[orderCurrency] || '₹';
+                          const rates = { INR: 1.0, USD: 0.012, GBP: 0.0094 };
+                          const rate = rates[orderCurrency] || 1.0;
+                          const converted = Number(selectedFulfillmentOrder.total_amount) * rate;
+                          const decimals = orderCurrency === 'INR' ? 0 : 2;
+                          return `${symbol}${converted.toFixed(decimals)}`;
+                        })()}
+                      </td>
                     </tr>
                   </tbody>
                 </table>

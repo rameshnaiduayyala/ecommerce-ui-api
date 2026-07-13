@@ -27,7 +27,7 @@ const InputField = ({ label, name, value, onChange, placeholder = '', type = 'te
 const CheckoutPage = () => {
   const { cartItems, cartTotal, clearCart, cartId } = useCart();
   const { user } = useAuth();
-  const { formatPrice } = useCurrency();
+  const { formatPrice, currency } = useCurrency();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -140,7 +140,8 @@ const CheckoutPage = () => {
         cartId,
         couponCode: appliedCoupon?.code || null,
         shippingAddressId: newAddress.id,
-        paymentMethod: paymentMethod === 'cod' ? 'COD' : paymentMethod === 'partial' ? 'WALLET' : 'STRIPE'
+        paymentMethod: paymentMethod === 'cod' ? 'COD' : paymentMethod === 'partial' ? 'WALLET' : 'STRIPE',
+        currency
       });
 
       if (!orderData?.id) throw new Error("Failed to place order.");

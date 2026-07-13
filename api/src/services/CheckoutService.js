@@ -82,7 +82,7 @@ export class CheckoutService {
     };
   }
 
-  async placeOrder({ cartId, couponCode, shippingAddressId, billingAddressId, paymentMethod, userId }) {
+  async placeOrder({ cartId, couponCode, shippingAddressId, billingAddressId, paymentMethod, userId, currency = "INR" }) {
     // 1. Re-calculate order math to prevent price manipulation
     const bill = await this.calculateTotal({
       cartId,
@@ -130,6 +130,7 @@ export class CheckoutService {
       orderNumber,
       userId,
       status: "PENDING",
+      currency,
       subtotal: bill.subtotal,
       taxAmount: bill.tax,
       shippingAmount: bill.shipping,

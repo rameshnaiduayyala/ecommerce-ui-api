@@ -9,13 +9,14 @@ export const calculateCheckout = async (cartId, couponCode = null, shippingAddre
   return res?.data;
 };
 
-export const placeOrder = async ({ cartId, couponCode = null, shippingAddressId, billingAddressId = null, paymentMethod }) => {
+export const placeOrder = async ({ cartId, couponCode = null, shippingAddressId, billingAddressId = null, paymentMethod, currency = null }) => {
   const res = await apiClient.post('/orders/checkout/place', {
     cartId,
     couponCode: couponCode || undefined,
     shippingAddressId,
     billingAddressId: billingAddressId || undefined,
-    paymentMethod
+    paymentMethod,
+    currency: currency || undefined
   });
   return res?.data;
 };
