@@ -8,6 +8,42 @@ import {
   flexRender 
 } from '@tanstack/react-table';
 
+import { useEffect, useRef } from 'react';
+
+const BarcodeElement = ({ value, format = 'CODE128' }) => {
+  const svgRef = useRef(null);
+
+  useEffect(() => {
+    const generate = () => {
+      if (window.JsBarcode && svgRef.current) {
+        try {
+          window.JsBarcode(svgRef.current, value, {
+            format: format,
+            width: 1.5,
+            height: 30,
+            displayValue: false,
+            margin: 0
+          });
+        } catch (e) {
+          console.warn("JsBarcode failed:", e);
+        }
+      }
+    };
+
+    if (window.JsBarcode) {
+      generate();
+    } else {
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js';
+      script.async = true;
+      script.onload = generate;
+      document.body.appendChild(script);
+    }
+  }, [value, format]);
+
+  return <svg ref={svgRef} className="max-w-[90%] h-8" />;
+};
+
 const ProductManager = ({
   products = [],
   categoriesList = [],
@@ -29,6 +65,9 @@ const ProductManager = ({
   const [prodGlobalFilter, setProdGlobalFilter] = useState('');
   const [prodSorting, setProdSorting] = useState([]);
   const [prodPagination, setProdPagination] = useState({ pageIndex: 0, pageSize: 10 });
+  const [labelProduct, setLabelProduct] = useState(null);
+  const [labelQuantity, setLabelQuantity] = useState(12);
+  const [labelVariant, setLabelVariant] = useState(null);
 
   const handleProductChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -156,16 +195,26 @@ const ProductManager = ({
       id: 'actions',
       header: 'Actions',
       cell: info => (
-        <div className="flex gap-2">
+        <div className="flex gap-1.5">
           <button 
             onClick={() => startEdit(info.row.original)}
-            className="px-3 py-1.5 bg-[#fafafa] hover:bg-primary hover:text-white border border-border rounded-lg text-xs font-bold text-[#333] transition-all cursor-pointer"
+            className="px-2.5 py-1.5 bg-[#fafafa] hover:bg-primary hover:text-white border border-border rounded-lg text-xs font-bold text-[#333] transition-all cursor-pointer"
           >
             Edit
           </button>
           <button 
+            onClick={() => {
+              setLabelProduct(info.row.original);
+              setLabelVariant(info.row.original.variants?.[0] || null);
+              setLabelQuantity(12);
+            }}
+            className="px-2.5 py-1.5 bg-[#fafafa] hover:bg-amber-500 hover:text-white border border-border rounded-lg text-xs font-bold text-amber-600 transition-all cursor-pointer"
+          >
+            🏷️ Labels
+          </button>
+          <button 
             onClick={() => handleDelete(info.row.original.id)}
-            className="px-3 py-1.5 bg-[#fafafa] hover:bg-destructive hover:text-white border border-border rounded-lg text-xs font-bold text-destructive transition-all cursor-pointer"
+            className="px-2.5 py-1.5 bg-[#fafafa] hover:bg-destructive hover:text-white border border-border rounded-lg text-xs font-bold text-destructive transition-all cursor-pointer"
           >
             Delete
           </button>
@@ -320,7 +369,7 @@ const ProductManager = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity">
           <div className="absolute inset-0" onClick={() => setIsProductModalOpen(false)}></div>
           
-          <div className="relative w-full max-w-2xl bg-white border border-border rounded-3xl p-6 md:p-8 flex flex-col gap-5 max-h-[92vh] overflow-y-auto z-10 shadow-2xl animate-scale-up">
+          <div className="relative w-full max-w-2xl bg-white border border-border/80 border-t-4 border-t-primary rounded-3xl p-6 md:p-8 flex flex-col gap-5 max-h-[92vh] overflow-y-auto z-10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] animate-scale-up">
             <div className="flex justify-between items-center border-b border-border pb-4">
               <h2 className="text-xl font-bold text-[#333]">
                 {editingProduct ? 'Edit Product' : 'Add New Product'}
@@ -475,6 +524,128 @@ const ProductManager = ({
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {/* Barcode & SKU Label Printing Modal */}
+      {labelProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity no-print">
+          <div className="absolute inset-0" onClick={() => setLabelProduct(null)}></div>
+          
+          <div className="relative w-full max-w-4xl bg-white border border-border/80 border-t-4 border-t-primary rounded-3xl p-6 md:p-8 flex flex-col md:flex-row gap-8 max-h-[90vh] z-10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] animate-scale-up">
+            {/* Print configuration Sidebar */}
+            <div className="w-full md:w-80 shrink-0 flex flex-col gap-5 border-r border-border/80 pr-6">
+              <div>
+                <h3 className="text-xl font-bold font-serif text-[#333]">Label ERP Printer</h3>
+                <p className="text-xs text-muted-foreground mt-1">Configure layout options and print barcodes for warehouse tagging.</p>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-black uppercase tracking-wider text-muted-foreground">Select Variant SKU</label>
+                <select 
+                  value={labelVariant ? labelVariant.sku : 'base'} 
+                  onChange={(e) => {
+                    const sku = e.target.value;
+                    if (sku === 'base') setLabelVariant(null);
+                    else setLabelVariant(labelProduct.variants?.find(v => v.sku === sku) || null);
+                  }}
+                  className="bg-white border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-primary text-sm text-[#333] cursor-pointer"
+                >
+                  <option value="base">Base Product: {labelProduct.baseSku}</option>
+                  {(labelProduct.variants || []).map(v => (
+                    <option key={v.sku} value={v.sku}>Variant SKU: {v.sku} ({v.size || v.weight})</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-black uppercase tracking-wider text-muted-foreground">Quantity to Print</label>
+                <input 
+                  type="number" 
+                  min="1" 
+                  max="100" 
+                  value={labelQuantity} 
+                  onChange={(e) => setLabelQuantity(parseInt(e.target.value) || 12)}
+                  className="bg-white border border-border rounded-xl px-4 py-3 focus:outline-none focus:border-primary text-sm font-mono text-[#333]" 
+                />
+              </div>
+
+              <button 
+                onClick={() => window.print()}
+                className="bg-primary hover:bg-primary/95 text-white font-bold py-3.5 rounded-xl transition-all shadow-[0_4px_12px_rgba(186,36,42,0.15)] active:scale-98 cursor-pointer border-none mt-2"
+              >
+                🖨️ Print Labels Sheet
+              </button>
+
+              <button 
+                onClick={() => setLabelProduct(null)}
+                className="bg-[#fafafa] hover:bg-black/5 border border-border text-[#333] font-bold py-3.5 rounded-xl transition-all cursor-pointer border-none"
+              >
+                Close Printer
+              </button>
+            </div>
+
+            {/* Label sheet Preview Grid */}
+            <div className="flex-1 overflow-y-auto pr-2 max-h-[70vh]">
+              <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-4">Print Preview Sheet (Avery 5160 template)</h4>
+              
+              <div id="barcode-print-container" className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 bg-[#f8fafc] border border-border rounded-2xl">
+                {Array.from({ length: labelQuantity }).map((_, idx) => {
+                  const skuVal = labelVariant ? labelVariant.sku : labelProduct.baseSku;
+                  const priceVal = labelVariant ? labelVariant.price : labelProduct.basePrice || labelProduct.price;
+                  const weightVal = labelVariant ? `(${labelVariant.size || labelVariant.weight})` : '';
+                  const barcodeVal = labelVariant ? labelVariant.barcode : labelProduct.barcode || '888777666555';
+                  
+                  return (
+                    <div key={idx} className="bg-white border border-slate-300 p-3 rounded-lg flex flex-col items-center justify-between text-center select-none shadow-sm h-32 w-full font-mono text-[9px] relative overflow-hidden text-slate-800 border-dashed hover:border-primary/50 transition-colors">
+                      <span className="text-[8px] font-black uppercase tracking-wider text-amber-500 font-sans leading-none">Aha Konaseema</span>
+                      
+                      <div className="min-w-0 w-full mt-1.5 px-0.5">
+                        <p className="font-sans font-black text-[9px] text-slate-900 truncate leading-none">{labelProduct.name}</p>
+                        <p className="text-[8px] font-black text-slate-500 truncate leading-tight mt-0.5">{weightVal || 'Base'}</p>
+                      </div>
+
+                      {/* Simulated Barcode */}
+                      <div className="flex flex-col items-center justify-center my-1.5 w-full shrink-0">
+                        <BarcodeElement value={barcodeVal} />
+                        <span className="text-[7px] text-slate-500 mt-0.5 tracking-widest">{skuVal}</span>
+                      </div>
+
+                      <span className="font-sans font-black text-slate-900 leading-none">₹{Number(priceVal || 0).toFixed(0)}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+          
+          <style>{`
+            @media print {
+              body * {
+                visibility: hidden !important;
+              }
+              #barcode-print-container, #barcode-print-container * {
+                visibility: visible !important;
+              }
+              #barcode-print-container {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                display: grid !important;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 15px !important;
+                background: white !important;
+                border: none !important;
+                padding: 0 !important;
+              }
+              #barcode-print-container > div {
+                border: 1px solid #000 !important;
+                box-shadow: none !important;
+                page-break-inside: avoid !important;
+              }
+            }
+          `}</style>
         </div>
       )}
     </div>

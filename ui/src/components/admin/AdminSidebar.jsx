@@ -5,7 +5,9 @@ const AdminSidebar = ({ activeTab, setActiveTab, userEmail, onSignOut }) => {
     { id: 'overview', label: 'Dashboard Overview', icon: '📊' },
     { id: 'products', label: 'Inventory Catalog', icon: '📦' },
     { id: 'categories', label: 'Categories Manager', icon: '📂' },
+    { id: 'brands', label: 'Brands Directory', icon: '🏷️' },
     { id: 'orders', label: 'Fulfillment Control', icon: '🛵' },
+    { id: 'customers', label: 'Customer Directory', icon: '👥' },
     { id: 'announcements', label: 'Flash Announcements', icon: '⚡' },
     { id: 'coupons', label: 'Campaign Coupons', icon: '🎟️' },
     { id: 'settings', label: 'Store Settings', icon: '⚙️' },
@@ -57,10 +59,10 @@ const AdminSidebar = ({ activeTab, setActiveTab, userEmail, onSignOut }) => {
         {onSignOut && (
           <button 
             onClick={onSignOut}
-            className="text-slate-500 hover:text-red-400 p-2 rounded-lg cursor-pointer bg-transparent border-none outline-none"
+            className="text-red-400 hover:text-red-500 bg-red-950/20 hover:bg-red-950/40 px-2.5 py-1.5 rounded-lg font-bold text-[10px] transition-all cursor-pointer border-none uppercase tracking-wider shrink-0"
             title="Sign Out"
           >
-            🚪
+            Exit
           </button>
         )}
       </div>

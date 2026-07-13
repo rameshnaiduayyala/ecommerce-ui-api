@@ -485,45 +485,6 @@ const EnterpriseHeader = () => {
             </div>
           </div>
         </div>
-
-        {/* ── SECONDARY CATEGORIES SUB-BAR ── */}
-        <div className="wm-secondary-nav">
-          <div className="wm-container">
-            <nav className="wm-secondary-inner" aria-label="Department navigation">
-              {SECONDARY_NAV.map((item) =>
-                item.hasDrop ? (
-                  <div key={item.label} className="wm-dept-wrap" ref={deptRef}>
-                    <button
-                      onClick={() => setDeptOpen(o => !o)}
-                      className={`wm-sec-link wm-dept-btn ${deptOpen ? 'active' : ''}`}
-                      aria-expanded={deptOpen}
-                      aria-haspopup="true"
-                    >
-                      {item.label}
-                      <svg viewBox="0 0 20 20" fill="currentColor" className="wm-sec-chevron">
-                        <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd"/>
-                      </svg>
-                    </button>
-                    {deptOpen && (
-                      <div className="wm-dept-drop">
-                        <p className="wm-dept-drop-title">Traditional Food Depts</p>
-                        {DEPARTMENTS.map(dept => (
-                          <Link key={dept.label} to={dept.path} className="wm-dept-drop-item" onClick={() => setDeptOpen(false)}>
-                            {dept.label}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <Link key={item.label} to={item.path || '/products'} className="wm-sec-link">
-                    {item.label}
-                  </Link>
-                )
-              )}
-            </nav>
-          </div>
-        </div>
       </header>
 
       {/* ── INTERACTIVE location pin picker MODAL ── */}

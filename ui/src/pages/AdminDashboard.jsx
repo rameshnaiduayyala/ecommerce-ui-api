@@ -7,6 +7,7 @@ import {
   getCoupons, addCoupon, deleteCoupon, toggleCoupon, 
   uploadImage, addCategory, deleteCategory 
 } from '../api/admin';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { getCategories } from '../api/catalog';
 import { useAuth } from '../context/AuthContext';
 
@@ -19,9 +20,19 @@ import OrderManager from '../components/admin/OrderManager';
 import AnnouncementManager from '../components/admin/AnnouncementManager';
 import CouponManager from '../components/admin/CouponManager';
 import SettingsManager from '../components/admin/SettingsManager';
+import BrandManager from '../components/admin/BrandManager';
+import CustomerManager from '../components/admin/CustomerManager';
+import AdminHeader from '../components/admin/AdminHeader';
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const activeTab = location.pathname.split('/').filter(Boolean)[1] || 'overview';
+  
+  const setActiveTab = (tabId) => {
+    navigate(`/admin/${tabId === 'overview' ? '' : tabId}`);
+  };
+
   const { user, signOut } = useAuth();
   
   // Data States
@@ -165,22 +176,17 @@ const AdminDashboard = () => {
         onSignOut={signOut} 
       />
       
-      {/* RIGHT CONTENT PANEL */}
-      <main className="flex-1 min-w-0 p-8 md:p-12 overflow-y-auto">
-        {/* Top Header clock info banner */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4 print:hidden">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[9px] font-black uppercase tracking-widest text-emerald-600">Active Kitchen Nodes</span>
-            </div>
-            <h2 className="text-3xl font-serif font-black text-[#1a1a1a] mt-1 capitalize">{activeTab} control panel</h2>
-          </div>
-          
-          <div className="text-xs text-muted-foreground bg-white border border-border px-4 py-2 rounded-xl font-medium shadow-sm">
-            🕒 Server Time: <span className="font-mono">{new Date().toLocaleTimeString()}</span>
-          </div>
-        </div>
+      {/* RIGHT WORKSPACE */}
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+        {/* ERP HEADER */}
+        <AdminHeader 
+          activeTab={activeTab} 
+          userEmail={user?.email} 
+          onSignOut={signOut}
+        />
+        
+        {/* SCROLLABLE MAIN CONTENT */}
+        <main className="flex-1 p-8 md:p-12 overflow-y-auto">
 
         {/* Dynamic Tab Switchboard Views */}
         {activeTab === 'overview' && (
@@ -215,6 +221,14 @@ const AdminDashboard = () => {
             deleteCategory={deleteCategory}
             loadData={loadData}
           />
+        )}
+
+        {activeTab === 'brands' && (
+          <BrandManager />
+        )}
+
+        {activeTab === 'customers' && (
+          <CustomerManager />
         )}
 
         {activeTab === 'orders' && (
@@ -257,6 +271,7 @@ const AdminDashboard = () => {
           />
         )}
       </main>
+      </div>
 
       {/* Shared Asset Library Picker Modal overlay */}
       {isAssetPickerOpen && (

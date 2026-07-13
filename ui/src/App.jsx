@@ -93,6 +93,9 @@ function App() {
               <Route path="/print/packing-slip/:orderId" element={<PrintPackingSlip />} />
               <Route path="/print/invoice/:orderId" element={<PrintInvoice />} />
 
+              {/* Dedicated Admin Route WITHOUT MainLayout wrapper */}
+              <Route path="/admin/*" element={<ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute>} />
+
               {/* Standard Application Routes wrapping with MainLayout */}
               <Route path="*" element={
                 <MainLayout>
@@ -107,7 +110,6 @@ function App() {
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-                    <Route path="/admin" element={<ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute>} />
                     <Route path="/wishlist" element={<ProtectedRoute><WishlistPage /></ProtectedRoute>} />
                     <Route path="/search" element={<SearchResultsPage />} />
                     <Route path="/test-notifications" element={<TestNotificationsPage />} />
