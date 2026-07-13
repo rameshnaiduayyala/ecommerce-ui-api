@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Enterprise E-Commerce API Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #0d1117;
+      color: #c9d1d9;
+      font-family: 'Outfit', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+    h1 {
+      color: #58a6ff;
+      font-size: 28px;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    p {
+      color: #8b949e;
+      margin-top: 0;
+      margin-bottom: 24px;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    li {
+      margin-bottom: 16px;
+    }
+    a {
+      color: #58a6ff;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-block;
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+    a:hover {
+      color: #1f6feb;
+      transform: translateX(4px);
+    }
+    .description {
+      display: block;
+      color: #8b949e;
+      font-size: 14px;
+      font-weight: 300;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Enterprise E-Commerce API Portal</h1>
+    <p>Available public service routes and active developer tools:</p>
+    <ul>
+      <li>
+        <a href="/documentation" target="_blank">📖 Swagger OpenAPI Specification</a>
+        <span class="description">Interactive REST API playground for developers.</span>
+      </li>
+      <li>
+        <a href="/health">🧪 System Health Check</a>
+        <span class="description">Verifies database pools, memory logs, and server uptime.</span>
+      </li>
+      <li>
+        <a href="/api/v1/catalog/products">🏷️ Product Catalog</a>
+        <span class="description">Fetches catalog items (Supports search, filtering, and page parameters).</span>
+      </li>
+      <li>
+        <a href="/api/v1/catalog/categories">🌿 Categories Hierarchy</a>
+        <span class="description">Fetches nested tree structure of product categories.</span>
+      </li>
+      <li>
+        <a href="/api/v1/catalog/brands">🔥 Active Brands</a>
+        <span class="description">Lists registered product brands.</span>
+      </li>
+      <li>
+        <a href="/api/v1/cms/pages">📄 CMS Static Pages</a>
+        <span class="description">Fetches system terms, FAQ, and details.</span>
+      </li>
+      <li>
+        <a href="/api/v1/cms/blogs">✍️ Blog Feed</a>
+        <span class="description">Lists published blog posts.</span>
+      </li>
+      <li>
+        <a href="/api/v1/cms/faqs">❓ Frequently Asked Questions</a>
+        <span class="description">Retrieves sorting list FAQs.</span>
+      </li>
+    </ul>
+  </div>
+</body>
+</html>
