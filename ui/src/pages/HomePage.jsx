@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import HeroCarousel from '../components/HeroCarousel';
 import CategoryStrip from '../components/CategoryStrip';
-import WalmartProductCard from '../components/WalmartProductCard';
+import ProductCard from '../components/ProductCard';
 import { getCategories, getProducts } from '../api/catalog';
 import { getStoreSettings } from '../api/admin';
 
@@ -134,7 +134,7 @@ const HomePage = () => {
             </div>
           ) : featuredProducts.length > 0 ? (
             <div className="wm-product-grid">
-              {featuredProducts.map(p => <WalmartProductCard key={p.id} product={p} />)}
+              {featuredProducts.map(p => <ProductCard key={p.id} product={p} />)}
             </div>
           ) : (
             <div className="wm-empty-products">
@@ -182,7 +182,7 @@ const HomePage = () => {
               </Link>
             </div>
             <div className="wm-product-grid-4">
-              {newArrivals.map(p => <WalmartProductCard key={p.id} product={p} />)}
+              {newArrivals.map(p => <ProductCard key={p.id} product={p} />)}
             </div>
           </div>
         </section>

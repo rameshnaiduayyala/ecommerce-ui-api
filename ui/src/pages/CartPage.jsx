@@ -10,7 +10,7 @@ const CartPage = () => {
   useEffect(() => {
     getStoreSettings()
       .then(data => { if (data) setSettings(data); })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const shippingFee = parseFloat(settings.shipping_fee ?? 50);

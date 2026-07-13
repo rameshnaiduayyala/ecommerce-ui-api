@@ -113,9 +113,9 @@ const ProductDetailsPage = () => {
     </div>
   );
 
-  const images = product.images?.map(i => i.url).filter(Boolean).length > 0
-    ? product.images.map(i => i.url)
-    : [product.image_url || `https://placehold.co/600x600/faf0eb/BA242A?text=${encodeURIComponent(product.name.charAt(0))}`];
+  const images = (product.images && product.images.length > 0)
+    ? product.images.map(i => i?.url).filter(Boolean)
+    : [product.image_url || `https://placehold.co/600x600/faf0eb/BA242A?text=${encodeURIComponent(product.name?.charAt(0) || '?')}`];
 
   const price = Number(selectedVariant?.price ?? product.basePrice ?? product.price ?? 0);
   const originalPrice = Number(product.basePrice ?? product.price ?? 0);

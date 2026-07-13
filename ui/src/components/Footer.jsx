@@ -64,9 +64,9 @@ const Footer = () => {
     <footer className="mt-16 w-full">
 
       {/* ── TOP DARK BRAND PANEL ── */}
-      <div className="bg-gradient-to-br from-[#0f0505] via-[#1a0808] to-black text-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.04] bg-[radial-gradient(circle_at_30%_50%,_white_1px,_transparent_1px)] bg-[length:24px_24px]" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="bg-gradient-to-br from-[#090e1a] via-[#101c36] to-[#020617] text-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle_at_30%_50%,_white_1px,_transparent_1px)] bg-[length:24px_24px]" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-amber-400/5 rounded-full blur-[80px] pointer-events-none" />
 
         <div className="container mx-auto px-4 md:px-8 py-16 relative z-10">
@@ -114,7 +114,7 @@ const Footer = () => {
               {/* Social icons */}
               <div className="flex items-center gap-2 pt-1">
                 {SOCIAL_LINKS.map(s => (
-                  <a key={s.label} href={s.href} aria-label={s.label} className="w-8 h-8 rounded-full bg-white/8 border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-primary hover:border-primary transition-all duration-200">
+                  <a key={s.label} href={s.href} aria-label={s.label} className="w-8 h-8 rounded-full bg-white/8 border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-[#0071CE] hover:border-[#0071CE] transition-all duration-200">
                     {s.icon}
                   </a>
                 ))}
@@ -190,7 +190,7 @@ const Footer = () => {
             </p>
             <p className="text-[10px] text-white/35 font-medium flex items-center gap-1">
               Designed &amp; Developed with
-              <span className="text-primary animate-pulse mx-0.5">❤️</span>
+              <span className="text-red-500 animate-pulse mx-0.5">❤️</span>
               by{' '}
               <a
                 href="https://rameshayyala.online"

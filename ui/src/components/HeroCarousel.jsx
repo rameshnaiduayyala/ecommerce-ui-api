@@ -6,55 +6,55 @@ const DEFAULT_SLIDES = [
     id: 1,
     badge: '🔥 Hot Deals',
     headline: 'Big Savings\nJust Dropped',
-    sub: 'Shop thousands of items at rollback prices — updated daily.',
+    sub: 'Shop traditional Godavari sweets at special rollback prices — updated daily.',
     cta: 'Shop Now',
     ctaLink: '/products',
     ctaSecondary: 'Browse Deals',
     ctaSecondaryLink: '/categories',
-    bgColor: '#FFF8E7',
-    accentColor: '#0071CE',
+    bgColor: 'radial-gradient(circle at 80% 20%, #ffedd5 0%, #fffbeb 55%, #fffdfa 100%)',
+    accentColor: '#BA242A', // Enterprise red accent
     products: [
-      { src: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&q=80', label: 'Watches' },
-      { src: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=300&q=80', label: 'Beauty' },
-      { src: 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=300&q=80', label: 'Sports' },
+      { src: 'https://images.unsplash.com/photo-1587314168485-3236d6710814?w=300&q=80', label: 'Traditional Sweets' },
+      { src: 'https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?w=300&q=80', label: 'Savories' },
+      { src: 'https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?w=300&q=80', label: 'Dry Fruits' },
     ],
-    rollback: 'Rollbacks & More',
+    rollback: 'Rollback Deals',
   },
   {
     id: 2,
     badge: '✨ New Arrivals',
-    headline: 'Fresh Finds\nEvery Week',
-    sub: 'Discover trending products across all categories, delivered fast.',
+    headline: 'Fresh Delicacies\nEvery Week',
+    sub: 'Discover newly added products from Konaseema, prepared fresh and delivered fast.',
     cta: 'Shop New Arrivals',
     ctaLink: '/products',
     ctaSecondary: 'View All',
     ctaSecondaryLink: '/categories',
-    bgColor: '#EBF5FF',
+    bgColor: 'radial-gradient(circle at 80% 20%, #dbeafe 0%, #f0f9ff 55%, #fafaf9 100%)',
     accentColor: '#0071CE',
     products: [
-      { src: 'https://images.unsplash.com/photo-1593640408182-31c228b2e2c2?w=300&q=80', label: 'Electronics' },
-      { src: 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=300&q=80', label: 'Photography' },
-      { src: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&q=80', label: 'Footwear' },
+      { src: 'https://images.unsplash.com/photo-1589113806221-72940243c634?w=300&q=80', label: 'Kaja Specials' },
+      { src: 'https://images.unsplash.com/photo-1587314168485-3236d6710814?w=300&q=80', label: 'Ariselu' },
+      { src: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300&q=80', label: 'Festive Packs' },
     ],
-    rollback: 'New This Week',
+    rollback: 'New Prepared',
   },
   {
     id: 3,
     badge: '⚡ Flash Sale',
-    headline: 'Save More\nSpend Less',
-    sub: 'Exclusive online-only pricing on top brands. Limited time only.',
+    headline: 'Save More\nEat Sweet',
+    sub: 'Exclusive online-only pricing on organic sweet boxes. Limited quantities.',
     cta: 'Grab the Deal',
     ctaLink: '/products',
     ctaSecondary: 'All Categories',
     ctaSecondaryLink: '/categories',
-    bgColor: '#FFF0F0',
+    bgColor: 'radial-gradient(circle at 80% 20%, #ffe4e6 0%, #fff1f2 55%, #fffcfc 100%)',
     accentColor: '#C8102E',
     products: [
-      { src: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=300&q=80', label: 'Skincare' },
-      { src: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&q=80', label: 'Headphones' },
-      { src: 'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=300&q=80', label: 'Laptops' },
+      { src: 'https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?w=300&q=80', label: 'Chikki' },
+      { src: 'https://images.unsplash.com/photo-1587314168485-3236d6710814?w=300&q=80', label: 'Sunnundalu' },
+      { src: 'https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?w=300&q=80', label: 'Laddu Box' },
     ],
-    rollback: 'Flash Deals',
+    rollback: 'Flash Sweets',
   },
 ];
 
@@ -64,6 +64,9 @@ const HeroCarousel = ({ slides: propSlides }) => {
   const [paused, setPaused] = useState(false);
   const [animating, setAnimating] = useState(false);
   const intervalRef = useRef(null);
+
+  // Transition duration of slides (in ms)
+  const SLIDE_DURATION = 5000;
 
   const goTo = useCallback((idx) => {
     if (animating) return;
@@ -76,9 +79,14 @@ const HeroCarousel = ({ slides: propSlides }) => {
   const next = useCallback(() => goTo((current + 1) % slides.length), [current, goTo, slides.length]);
 
   useEffect(() => {
-    if (paused) { clearInterval(intervalRef.current); return; }
-    intervalRef.current = setInterval(next, 5000);
-    return () => clearInterval(intervalRef.current);
+    if (paused) {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      return;
+    }
+    intervalRef.current = setInterval(next, SLIDE_DURATION);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, [paused, next]);
 
   const slide = slides[current];
@@ -120,9 +128,9 @@ const HeroCarousel = ({ slides: propSlides }) => {
 
             {/* Trust row */}
             <div className="wm-hero-trust">
-              <span className="wm-hero-trust-item">✓ Free shipping $35+</span>
-              <span className="wm-hero-trust-item">✓ Easy returns</span>
-              <span className="wm-hero-trust-item">✓ Price match</span>
+              <span className="wm-hero-trust-item">✓ Free shipping ₹999+</span>
+              <span className="wm-hero-trust-item">✓ Fresh preparation</span>
+              <span className="wm-hero-trust-item">✓ Traditional recipes</span>
             </div>
           </div>
 
@@ -183,14 +191,22 @@ const HeroCarousel = ({ slides: propSlides }) => {
           )}
         </button>
 
-        <div className="wm-hero-dots">
+        <div className="wm-hero-dots-progress">
           {slides.map((_, i) => (
             <button
               key={i}
               onClick={() => goTo(i)}
               aria-label={`Go to slide ${i + 1}`}
-              className={`wm-hero-dot ${i === current ? 'active' : ''}`}
-            />
+              className={`wm-hero-dot-wrapper ${i === current ? 'active' : ''}`}
+            >
+              <div 
+                className="wm-hero-dot-progress-bar"
+                style={{
+                  width: i === current ? (paused ? '100%' : '100%') : '0%',
+                  transition: i === current && !paused ? `width ${SLIDE_DURATION}ms linear` : 'none',
+                }}
+              />
+            </button>
           ))}
         </div>
 
