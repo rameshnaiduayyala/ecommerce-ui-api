@@ -7,6 +7,7 @@ import { getAddresses, createAddress } from '../api/auth';
 import { placeOrder } from '../api/orders';
 import { EmailTemplates } from '../notifications/emailService';
 import { pushService } from '../notifications/pushService';
+import { useCurrency } from '../context/CurrencyContext';
 
 const InputField = ({ label, name, value, onChange, placeholder = '', type = 'text', required = true, colSpan = false, mono = false }) => (
   <div className={`flex flex-col gap-1.5 ${colSpan ? 'col-span-2' : ''}`}>
@@ -26,6 +27,7 @@ const InputField = ({ label, name, value, onChange, placeholder = '', type = 'te
 const CheckoutPage = () => {
   const { cartItems, cartTotal, clearCart, cartId } = useCart();
   const { user } = useAuth();
+  const { formatPrice } = useCurrency();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -317,7 +319,7 @@ const CheckoutPage = () => {
               >
                 {isProcessing ? (
                   <><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>Processing…</>
-                ) : `Place Order — ₹${dueTodayAmount.toFixed(2)}`}
+                ) : `Place Order — ${formatPrice(dueTodayAmount)}`}
               </button>
             </div>
 
@@ -345,7 +347,7 @@ const CheckoutPage = () => {
                           <span className="absolute -top-1.5 -right-1.5 bg-primary text-white text-[8px] font-black w-4 h-4 flex items-center justify-center rounded-full">{item.quantity}</span>
                         </div>
                         <span className="text-xs font-semibold text-[#333] flex-1 line-clamp-1">{item.name}</span>
-                        <span className="text-xs font-black text-[#222] shrink-0">₹{(price * item.quantity).toFixed(2)}</span>
+                        <span className="text-xs font-black text-[#222] shrink-0">{formatPrice(price * item.quantity)}</span>
                       </div>
                     );
                   })}
@@ -369,22 +371,22 @@ const CheckoutPage = () => {
                 <div className="flex flex-col gap-2.5 border-t border-border/40 pt-4">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground font-medium">Subtotal</span>
-                    <span className="font-bold text-[#222]">₹{cartTotal.toFixed(2)}</span>
+                    <span className="font-bold text-[#222]">{formatPrice(cartTotal)}</span>
                   </div>
                   {appliedCoupon && (
                     <div className="flex justify-between text-sm">
                       <span className="text-emerald-600 font-bold">Discount ({appliedCoupon.code})</span>
-                      <span className="text-emerald-600 font-bold">−₹{discountAmount().toFixed(2)}</span>
+                      <span className="text-emerald-600 font-bold">−{formatPrice(discountAmount())}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground font-medium">Shipping</span>
-                    <span className={`font-bold ${shipping === 0 ? 'text-emerald-500' : 'text-[#222]'}`}>{shipping === 0 ? 'FREE' : `₹${shipping.toFixed(2)}`}</span>
+                    <span className={`font-bold ${shipping === 0 ? 'text-emerald-500' : 'text-[#222]'}`}>{shipping === 0 ? 'FREE' : formatPrice(shipping)}</span>
                   </div>
                   {paymentMethod === 'partial' && (
                     <div className="flex justify-between text-sm text-primary font-bold">
                       <span>Upfront ({settings.partial_payment_percent}%)</span>
-                      <span>₹{dueTodayAmount.toFixed(2)}</span>
+                      <span>{formatPrice(dueTodayAmount)}</span>
                     </div>
                   )}
                 </div>
@@ -394,7 +396,7 @@ const CheckoutPage = () => {
                   <span className="text-sm font-black text-[#222] uppercase tracking-wider">
                     {paymentMethod === 'cod' ? 'Due on Delivery' : paymentMethod === 'partial' ? 'Due Today' : 'Total'}
                   </span>
-                  <span className="text-2xl font-serif font-black text-primary">₹{dueTodayAmount.toFixed(2)}</span>
+                  <span className="text-2xl font-serif font-black text-primary">{formatPrice(dueTodayAmount)}</span>
                 </div>
 
                 {/* CTA — desktop */}
@@ -405,7 +407,7 @@ const CheckoutPage = () => {
                 >
                   {isProcessing ? (
                     <><svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>Processing…</>
-                  ) : `Place Order — ₹${dueTodayAmount.toFixed(2)}`}
+                  ) : `Place Order — ${formatPrice(dueTodayAmount)}`}
                 </button>
 
                 {/* Trust signals */}
