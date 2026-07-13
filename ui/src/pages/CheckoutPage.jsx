@@ -44,6 +44,13 @@ const CheckoutPage = () => {
   const [couponError, setCouponError] = useState('');
   const [couponSuccess, setCouponSuccess] = useState('');
   const [step, setStep] = useState(1); // 1 = Address, 2 = Payment
+  const [idempotencyKey] = useState(() => {
+    try {
+      return crypto.randomUUID();
+    } catch (e) {
+      return `key-${Date.now()}-${Math.random().toString(36).substring(2)}`;
+    }
+  });
 
   useEffect(() => {
     getStoreSettings().then(data => { if (data) setSettings(data); }).catch(() => {});
@@ -141,7 +148,8 @@ const CheckoutPage = () => {
         couponCode: appliedCoupon?.code || null,
         shippingAddressId: newAddress.id,
         paymentMethod: paymentMethod === 'cod' ? 'COD' : paymentMethod === 'partial' ? 'WALLET' : 'STRIPE',
-        currency
+        currency,
+        idempotencyKey
       });
 
       if (!orderData?.id) throw new Error("Failed to place order.");

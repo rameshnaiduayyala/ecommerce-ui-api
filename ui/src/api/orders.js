@@ -9,7 +9,11 @@ export const calculateCheckout = async (cartId, couponCode = null, shippingAddre
   return res?.data;
 };
 
-export const placeOrder = async ({ cartId, couponCode = null, shippingAddressId, billingAddressId = null, paymentMethod, currency = null }) => {
+export const placeOrder = async ({ cartId, couponCode = null, shippingAddressId, billingAddressId = null, paymentMethod, currency = null, idempotencyKey = null }) => {
+  const headers = {};
+  if (idempotencyKey) {
+    headers['Idempotency-Key'] = idempotencyKey;
+  }
   const res = await apiClient.post('/orders/checkout/place', {
     cartId,
     couponCode: couponCode || undefined,
@@ -17,7 +21,7 @@ export const placeOrder = async ({ cartId, couponCode = null, shippingAddressId,
     billingAddressId: billingAddressId || undefined,
     paymentMethod,
     currency: currency || undefined
-  });
+  }, false, headers);
   return res?.data;
 };
 

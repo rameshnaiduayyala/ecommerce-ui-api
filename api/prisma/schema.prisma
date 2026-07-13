@@ -444,6 +444,7 @@ model Order {
   shippingMethod    String?
   trackingNumber    String?
   notes             String?
+  idempotencyKey    String?             @unique
   items             OrderItem[]
   statusHistory     OrderStatusHistory[]
   transactions      Transaction[]

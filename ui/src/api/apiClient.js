@@ -107,9 +107,12 @@ export const apiClient = {
     headers: getHeaders()
   }),
   
-  post: (url, body, isMultipart = false) => request(url, {
+  post: (url, body, isMultipart = false, extraHeaders = {}) => request(url, {
     method: 'POST',
-    headers: getHeaders(isMultipart),
+    headers: {
+      ...getHeaders(isMultipart),
+      ...extraHeaders
+    },
     body: isMultipart ? body : JSON.stringify(body)
   }),
 

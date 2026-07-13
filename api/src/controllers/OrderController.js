@@ -49,6 +49,7 @@ export class OrderController {
   async placeOrder(request, reply) {
     const validated = placeOrderSchema.parse(request.body);
     const userId = request.user.id;
+    const idempotencyKey = request.headers['idempotency-key'] || null;
 
     const order = await this.checkoutService.placeOrder({
       cartId: validated.cartId,
@@ -57,7 +58,8 @@ export class OrderController {
       billingAddressId: validated.billingAddressId,
       paymentMethod: validated.paymentMethod,
       userId,
-      currency: validated.currency
+      currency: validated.currency,
+      idempotencyKey
     });
 
     return reply.status(211).send(formatResponse(true, "Order placed successfully.", order));

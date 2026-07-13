@@ -82,7 +82,28 @@ export class CheckoutService {
     };
   }
 
-  async placeOrder({ cartId, couponCode, shippingAddressId, billingAddressId, paymentMethod, userId, currency = "INR" }) {
+  async placeOrder({ cartId, couponCode, shippingAddressId, billingAddressId, paymentMethod, userId, currency = "INR", idempotencyKey = null }) {
+    // 0. Idempotency check: prevent duplicate transactions
+    if (idempotencyKey) {
+      const existingOrder = await this.cartRepository.prisma.order.findFirst({
+        where: { idempotencyKey, userId },
+        include: {
+          items: {
+            include: {
+              variant: {
+                include: {
+                  product: true
+                }
+              }
+            }
+          }
+        }
+      });
+      if (existingOrder) {
+        return existingOrder;
+      }
+    }
+
     // 1. Re-calculate order math to prevent price manipulation
     const bill = await this.calculateTotal({
       cartId,
@@ -131,6 +152,7 @@ export class CheckoutService {
       userId,
       status: "PENDING",
       currency,
+      idempotencyKey,
       subtotal: bill.subtotal,
       taxAmount: bill.tax,
       shippingAmount: bill.shipping,
