@@ -10,7 +10,7 @@ const PROMO_BANNERS = [
   {
     id: 1,
     title: 'Free Pickup Today',
-    desc: 'Order by 5 PM for same-day store pickup — no extra charge.',
+    desc: 'Order by 5 PM for same-day store pickup in Rajahmundry — no extra charge.',
     icon: '🏪',
     bg: '#EBF5FF',
     color: '#0071CE',
@@ -18,8 +18,8 @@ const PROMO_BANNERS = [
   },
   {
     id: 2,
-    title: 'Rollback Prices',
-    desc: 'Everyday savings on thousands of items throughout the store.',
+    title: 'Fresh Batch Prices',
+    desc: 'Everyday savings on freshly made sweets — direct from Konaseema kitchen.',
     icon: '💰',
     bg: '#FFF8E7',
     color: '#F5A623',
@@ -28,7 +28,7 @@ const PROMO_BANNERS = [
   {
     id: 3,
     title: 'Fast & Free Delivery',
-    desc: 'Get free delivery on orders over $35. Fast & reliable service.',
+    desc: 'Get free delivery on orders over ₹999. Pan-India shipping available.',
     icon: '🚚',
     bg: '#EDFBF0',
     color: '#1A9E43',
@@ -38,8 +38,8 @@ const PROMO_BANNERS = [
 
 const TRUST_ITEMS = [
   { icon: '🔒', title: 'Secure Checkout', desc: 'SSL encrypted, safe & secure' },
-  { icon: '↩️', title: 'Easy Returns', desc: '90-day hassle-free returns' },
-  { icon: '🏆', title: 'Top Brands', desc: 'Genuine products guaranteed' },
+  { icon: '🍬', title: 'Freshness Guaranteed', desc: 'Made fresh, vacuum sealed daily' },
+  { icon: '🏆', title: 'Pure Ingredients', desc: '100% pure ghee, no adulteration' },
   { icon: '📞', title: '24/7 Support', desc: 'Always here to help you' },
 ];
 
@@ -154,7 +154,7 @@ const HomePage = () => {
             <div className="wm-deal-banner-content">
               <span className="wm-deal-badge">⚡ Limited Time</span>
               <h2 className="wm-deal-title">
-                Free Shipping on Orders Over ${settings.free_shipping_threshold || '35'}
+                Free Shipping on Orders Over ₹{settings.free_shipping_threshold || '999'}
               </h2>
               <p className="wm-deal-desc">
                 Shop from thousands of items and get fast, reliable delivery right to your door.

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
+import { useCurrency } from '../context/CurrencyContext';
 
 /* ── Star Rating ── */
 const StarRating = ({ rating, count }) => {
@@ -24,6 +25,7 @@ const StarRating = ({ rating, count }) => {
 /* ── Walmart Product Card with Quick View Modal ── */
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
+  const { formatPrice } = useCurrency();
   const [wishlisted, setWishlisted] = useState(false);
   const [qty, setQty] = useState(0);
   const [toast, setToast] = useState('');
@@ -224,18 +226,16 @@ const ProductCard = ({ product }) => {
               {discountPrice ? (
                 <>
                   <span className="wm-price-now">
-                    ₹{priceInt}
-                    <sup className="wm-price-decimal-sup">.{priceDec}</sup>
+                    {formatPrice(displayPrice)}
                   </span>
                   <div className="wm-price-was-wrap">
-                    <span className="wm-price-was">₹{price.toFixed(0)}</span>
+                    <span className="wm-price-was">{formatPrice(price)}</span>
                     <span className="wm-price-save">Save {discount}%</span>
                   </div>
                 </>
               ) : (
                 <span className="wm-price-now">
-                  ₹{priceInt}
-                  <sup className="wm-price-decimal-sup">.{priceDec}</sup>
+                  {formatPrice(displayPrice)}
                 </span>
               )}
             </div>
@@ -320,12 +320,11 @@ const ProductCard = ({ product }) => {
 
                 <div className="wm-qv-price-row">
                   <span className="wm-qv-price-now" style={{ display: 'inline-flex', alignItems: 'flex-start' }}>
-                    ₹{priceInt}
-                    <sup style={{ fontSize: '11px', fontWeight: '700', top: '-0.25em', marginLeft: '1px', position: 'relative' }}>.{priceDec}</sup>
+                    {formatPrice(displayPrice)}
                   </span>
                   {discountPrice && (
                     <>
-                      <span className="wm-qv-price-was">₹{price.toFixed(0)}</span>
+                      <span className="wm-qv-price-was">{formatPrice(price)}</span>
                       <span className="wm-qv-price-save">Save {discount}%</span>
                     </>
                   )}

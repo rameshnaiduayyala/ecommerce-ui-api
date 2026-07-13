@@ -13,12 +13,13 @@ const CATEGORY_COLORS = [
 ];
 
 const CategoriesPage = () => {
-  const [categories, setCategories]       = useState([]);
-  const [products, setProducts]           = useState([]);
-  const [loading, setLoading]             = useState(true);
+  const [categories, setCategories]           = useState([]);
+  const [products, setProducts]               = useState([]);
+  const [categoryProducts, setCategoryProducts] = useState([]);
+  const [loading, setLoading]                 = useState(true);
   const [productsLoading, setProductsLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null); // null = All
-  const [productCounts, setProductCounts] = useState({});
+  const [productCounts, setProductCounts]     = useState({});
 
   // Fetch categories and all products once
   useEffect(() => {
@@ -48,29 +49,29 @@ const CategoriesPage = () => {
     init();
   }, []);
 
-  // Fetch filtered products when category changes
+  // Fetch filtered products when category is selected
   const handleSelectCategory = async (cat) => {
     setSelectedCategory(cat);
-    if (!cat) return; // "All" uses existing products state
+    if (!cat) {
+      setCategoryProducts([]); // reset; "All" uses the main products state
+      return;
+    }
 
     setProductsLoading(true);
     try {
       const filtered = await getProductsByCategory(cat.id, { take: 100, status: 'PUBLISHED' });
-      // Store category-specific products in a temp state — we filter client-side too for speed
+      setCategoryProducts(filtered || []);
     } catch (err) {
       console.error(err);
+      setCategoryProducts([]);
     } finally {
       setProductsLoading(false);
     }
   };
 
-  // Client-side filtering using the already-fetched 200 products
-  const displayedProducts = selectedCategory
-    ? products.filter(p => {
-        const catId = p.categoryId || p.categories?.[0]?.categoryId || p.categories?.[0]?.category?.id;
-        return catId === selectedCategory.id;
-      })
-    : products;
+  // Use category-specific products when a category is selected,
+  // otherwise fall back to the initial full product list.
+  const displayedProducts = selectedCategory ? categoryProducts : products;
 
   return (
     <div className="min-h-screen bg-[#fafafa] pb-24">

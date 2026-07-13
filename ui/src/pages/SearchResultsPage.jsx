@@ -13,8 +13,8 @@ const SearchResultsPage = () => {
     const search = async () => {
       setLoading(true);
       try {
-        const data = await getProducts({ search: query, take: 50 });
-        const mapped = data.map(p => ({
+        const data = await getProducts({ search: query, take: 50, status: 'PUBLISHED' });
+        const mapped = (data || []).map(p => ({
           ...p,
           price: Number(p.basePrice),
           image_url: p.images?.[0]?.url || null,

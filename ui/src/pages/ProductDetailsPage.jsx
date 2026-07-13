@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { getProductByIdOrSlug, getProducts } from '../api/catalog';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { useCurrency } from '../context/CurrencyContext';
 import ProductCard from '../components/ProductCard';
 
 const StarDisplay = ({ rating, count }) => {
@@ -28,6 +29,7 @@ const ProductDetailsPage = () => {
   const { id } = useParams();
   const { addToCart } = useCart();
   const { user } = useAuth();
+  const { formatPrice } = useCurrency();
 
   const [product, setProduct]               = useState(null);
   const [related, setRelated]               = useState([]);
@@ -39,6 +41,13 @@ const ProductDetailsPage = () => {
   const [toast, setToast]                   = useState('');
   const [addedAnim, setAddedAnim]           = useState(false);
   const [activeTab, setActiveTab]           = useState('description');
+
+  // Derive price & images early (with null guards) so handleWishlist
+  // can safely reference them even before product fully loads.
+  const images = (product?.images && product.images.length > 0)
+    ? product.images.map(i => i?.url).filter(Boolean)
+    : [product?.image_url || `https://placehold.co/600x600/faf0eb/BA242A?text=${encodeURIComponent(product?.name?.charAt(0) || '?')}`];
+  const price = Number(selectedVariant?.price ?? product?.basePrice ?? product?.price ?? 0);
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 2400); };
 
@@ -113,11 +122,7 @@ const ProductDetailsPage = () => {
     </div>
   );
 
-  const images = (product.images && product.images.length > 0)
-    ? product.images.map(i => i?.url).filter(Boolean)
-    : [product.image_url || `https://placehold.co/600x600/faf0eb/BA242A?text=${encodeURIComponent(product.name?.charAt(0) || '?')}`];
-
-  const price = Number(selectedVariant?.price ?? product.basePrice ?? product.price ?? 0);
+  // price and images are already derived above the early-return guards.
   const originalPrice = Number(product.basePrice ?? product.price ?? 0);
   const discount = selectedVariant && price < originalPrice
     ? Math.round(((originalPrice - price) / originalPrice) * 100)
@@ -223,10 +228,10 @@ const ProductDetailsPage = () => {
 
             {/* Price */}
             <div className="flex items-baseline gap-3">
-              <span className="text-4xl font-black text-[#1a1a1a]">₹{price.toFixed(0)}</span>
+              <span className="text-4xl font-black text-[#1a1a1a]">{formatPrice(price)}</span>
               {discount && (
                 <>
-                  <span className="text-lg text-muted-foreground line-through">₹{originalPrice.toFixed(0)}</span>
+                  <span className="text-lg text-muted-foreground line-through">{formatPrice(originalPrice)}</span>
                   <span className="text-sm font-bold text-emerald-600">{discount}% OFF</span>
                 </>
               )}
@@ -250,7 +255,7 @@ const ProductDetailsPage = () => {
                         }`}
                       >
                         {label}
-                        <span className="ml-1.5 opacity-75">₹{Number(v.price).toFixed(0)}</span>
+                        <span className="ml-1.5 opacity-75">{formatPrice(Number(v.price))}</span>
                       </button>
                     );
                   })}
@@ -282,11 +287,10 @@ const ProductDetailsPage = () => {
               </button>
             </div>
 
-            {/* Trust mini-badges */}
             <div className="grid grid-cols-2 gap-2 mt-1">
               {[
                 { icon: '🔒', label: 'Secure Payment' },
-                { icon: '🚚', label: 'Free Shipping ₹2000+' },
+                { icon: '🚚', label: `Free Shipping ${formatPrice(2000)}+` },
                 { icon: '↩️', label: 'Easy Returns' },
                 { icon: '✅', label: '100% Authentic' },
               ].map(b => (

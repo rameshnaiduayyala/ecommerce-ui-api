@@ -2,6 +2,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { useCurrency } from '../context/CurrencyContext';
 import { searchProducts } from '../api/catalog';
 import logoImg from '../assets/logo.png';
 
@@ -33,6 +34,7 @@ const EnterpriseHeader = () => {
   const [searchFocused, setSearchFocused] = useState(false);
   const { user, isAdmin, signOut } = useAuth();
   const { cartCount, cartTotal, cartItems } = useCart();
+  const { countryCode, countryName, symbol, flag, changeCountry, formatPrice } = useCurrency();
   const navigate = useNavigate();
   const location = useLocation();
   const deptRef = useRef(null);
@@ -252,6 +254,20 @@ const EnterpriseHeader = () => {
                 </svg>
               </button>
 
+              {/* Real-time Country & Currency Selector */}
+              <div className="flex items-center shrink-0">
+                <select
+                  value={countryCode}
+                  onChange={e => changeCountry(e.target.value)}
+                  className="bg-white/10 border border-white/20 text-white text-xs font-bold rounded-full px-3 py-1.5 focus:outline-none cursor-pointer hover:bg-white/15 transition-all outline-none"
+                  aria-label="Select Country"
+                >
+                  <option value="IN" className="text-black">🇮🇳 India (INR)</option>
+                  <option value="US" className="text-black">🇺🇸 USA (USD)</option>
+                  <option value="GB" className="text-black">🇬🇧 UK (GBP)</option>
+                </select>
+              </div>
+
               {/* Smart Autocomplete Search Bar */}
               <div className="wm-search-wrap" ref={deptRef}>
                 <form onSubmit={handleSearchSubmit} className={`wm-search-form ${searchFocused ? 'focused' : ''}`} role="search">
@@ -314,7 +330,7 @@ const EnterpriseHeader = () => {
                               <span className="wm-suggestion-item-text">
                                 {highlightMatch(prod.name, searchQuery)}
                               </span>
-                              <span className="wm-suggestion-product-price">₹{prod.price.toFixed(0)}</span>
+                              <span className="wm-suggestion-product-price">{formatPrice(prod.price)}</span>
                             </button>
                           ))
                         ) : (
@@ -409,7 +425,7 @@ const EnterpriseHeader = () => {
                     </div>
                     <div>
                       <span className="wm-action-top">&nbsp;</span>
-                      <span className="wm-action-bold">₹{cartTotal ? cartTotal.toFixed(0) : '0'}</span>
+                      <span className="wm-action-bold">{formatPrice(cartTotal || 0)}</span>
                     </div>
                   </Link>
 
@@ -430,14 +446,14 @@ const EnterpriseHeader = () => {
                                 <p className="wm-minicart-item-name">{item.name}</p>
                                 <p className="wm-minicart-item-qty">Qty: {item.quantity}</p>
                               </div>
-                              <span className="wm-minicart-item-price">₹{(item.price * item.quantity).toFixed(0)}</span>
+                              <span className="wm-minicart-item-price">{formatPrice(item.price * item.quantity)}</span>
                             </div>
                           ))}
                         </div>
                         <div className="wm-minicart-footer">
                           <div className="wm-minicart-total-row">
                             <span className="wm-minicart-total-label">Subtotal:</span>
-                            <span className="wm-minicart-total-value">₹{cartTotal.toFixed(0)}</span>
+                            <span className="wm-minicart-total-value">{formatPrice(cartTotal || 0)}</span>
                           </div>
                           <div className="wm-minicart-actions">
                             <Link to="/cart" className="wm-minicart-btn-cart">View Cart</Link>

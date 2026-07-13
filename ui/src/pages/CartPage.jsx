@@ -1,10 +1,12 @@
 import { useCart } from '../context/CartContext';
+import { useCurrency } from '../context/CurrencyContext';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { getStoreSettings } from '../api/admin';
 
 const CartPage = () => {
   const { cartItems, removeFromCart, updateQuantity, cartTotal, clearCart } = useCart();
+  const { formatPrice } = useCurrency();
   const [settings, setSettings] = useState({ shipping_fee: 50.00, free_shipping_threshold: 999.00 });
 
   useEffect(() => {
@@ -63,7 +65,7 @@ const CartPage = () => {
             {shipping > 0 && (
               <div className="bg-amber-50 border border-amber-200/70 rounded-2xl px-5 py-4 flex flex-col gap-2">
                 <p className="text-xs font-bold text-amber-800">
-                  Add <span className="font-black">₹{(freeThreshold - cartTotal).toFixed(2)}</span> more for <span className="text-emerald-600">FREE Shipping!</span>
+                  Add <span className="font-black">{formatPrice(freeThreshold - cartTotal)}</span> more for <span className="text-emerald-600">FREE Shipping!</span>
                 </p>
                 <div className="w-full bg-amber-100 h-1.5 rounded-full overflow-hidden">
                   <div className="bg-amber-400 h-full rounded-full transition-all duration-500" style={{ width: `${progressPct}%` }} />
@@ -102,7 +104,7 @@ const CartPage = () => {
                     {item.category && (
                       <p className="text-[9px] font-black tracking-widest uppercase text-muted-foreground/60 mt-0.5">{item.category}</p>
                     )}
-                    <p className="text-xs text-muted-foreground font-medium mt-1">₹{unitPrice.toFixed(2)} each</p>
+                    <p className="text-xs text-muted-foreground font-medium mt-1">{formatPrice(unitPrice)} each</p>
                   </div>
 
                   {/* Qty Stepper */}
@@ -120,7 +122,7 @@ const CartPage = () => {
 
                   {/* Line total */}
                   <div className="text-right shrink-0 min-w-[80px]">
-                    <p className="font-serif font-black text-base text-primary">₹{lineTotal.toFixed(2)}</p>
+                    <p className="font-serif font-black text-base text-primary">{formatPrice(lineTotal)}</p>
                   </div>
 
                   {/* Remove */}
@@ -168,12 +170,12 @@ const CartPage = () => {
               <div className="flex flex-col gap-3 mb-5">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground font-medium">Subtotal ({cartItems.length} items)</span>
-                  <span className="font-bold text-[#222]">₹{cartTotal.toFixed(2)}</span>
+                  <span className="font-bold text-[#222]">{formatPrice(cartTotal)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground font-medium">Shipping</span>
                   <span className={`font-bold ${shipping === 0 ? 'text-emerald-500' : 'text-[#222]'}`}>
-                    {shipping === 0 ? 'FREE' : `₹${shipping.toFixed(2)}`}
+                    {shipping === 0 ? 'FREE' : formatPrice(shipping)}
                   </span>
                 </div>
               </div>
@@ -182,7 +184,7 @@ const CartPage = () => {
               {shipping > 0 && (
                 <div className="bg-[#f9f5f0] rounded-xl px-4 py-3 mb-5 border border-amber-100">
                   <p className="text-[10px] font-bold text-amber-700 mb-1.5">
-                    ₹{(freeThreshold - cartTotal).toFixed(2)} away from free shipping
+                    {formatPrice(freeThreshold - cartTotal)} away from free shipping
                   </p>
                   <div className="w-full bg-amber-100 h-1 rounded-full overflow-hidden">
                     <div className="bg-amber-400 h-full rounded-full transition-all duration-500" style={{ width: `${progressPct}%` }} />
@@ -193,7 +195,7 @@ const CartPage = () => {
               {/* Total */}
               <div className="border-t border-border/50 pt-4 mb-6 flex justify-between items-baseline">
                 <span className="text-sm font-black text-[#222] uppercase tracking-wider">Total</span>
-                <span className="text-2xl font-serif font-black text-primary">₹{orderTotal.toFixed(2)}</span>
+                <span className="text-2xl font-serif font-black text-primary">{formatPrice(orderTotal)}</span>
               </div>
 
               {/* CTA */}
@@ -208,7 +210,7 @@ const CartPage = () => {
               <div className="mt-5 flex flex-col gap-2 pt-4 border-t border-border/30">
                 {[
                   { icon: '🔒', text: 'Secure & encrypted checkout' },
-                  { icon: '🚚', text: `Free delivery above ₹${freeThreshold.toFixed(0)}` },
+                  { icon: '🚚', text: `Free delivery above ${formatPrice(freeThreshold)}` },
                   { icon: '↩️', text: 'Easy returns & refunds' },
                 ].map(t => (
                   <div key={t.text} className="flex items-center gap-2 text-[10px] font-medium text-muted-foreground">

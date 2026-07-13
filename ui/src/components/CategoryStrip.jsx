@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useRef } from 'react';
 
-const FALLBACK_ICONS = ['🛒','📱','👗','🏠','⚽','🧸','💊','💄','📚','🍕','🎮','🚗','✈️','🎵','🌿','🐾'];
+const FALLBACK_ICONS = ['🍬','🍮','🧆','🍯','🌶️','🎁','🌾','🍡','🥮','🍛','🫙','🥜','🌰','🍚','🍘','🫕'];
 
 const CategoryStrip = ({ categories = [], loading = false }) => {
   const scrollRef = useRef(null);
